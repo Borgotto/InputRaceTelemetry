@@ -28,9 +28,11 @@ class CustomMainWindow(QMainWindow):
     def __init__(self):
         super(CustomMainWindow, self).__init__()
         # Define the geometry of the main window
-        self.setGeometry(500, 600, 400, 150)
+        self.setGeometry(300, 300, 800, 400)
+        self.setWindowTitle("my first window")
         # Create FRAME_A
         self.FRAME_A = QFrame(self)
+        self.FRAME_A.setStyleSheet("QWidget { background-color: %s }" % QColor(210,210,235,255).name())
         self.LAYOUT_A = QGridLayout()
         self.FRAME_A.setLayout(self.LAYOUT_A)
         self.setCentralWidget(self.FRAME_A)
@@ -42,6 +44,7 @@ class CustomMainWindow(QMainWindow):
         myDataLoop.start()
         self.show()
         return
+
 
     def addData_callbackFunc(self, value):
         # print("Add data: " + str(value))
@@ -56,7 +59,7 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         self.addedData = []
         print(matplotlib.__version__)
         # The data
-        self.xlim = 100
+        self.xlim = 200
         self.n = np.linspace(0, self.xlim - 1, self.xlim)
         a = []
         b = []
@@ -70,22 +73,15 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         # The window
         self.fig = Figure(figsize=(5,5), dpi=100)
         self.ax1 = self.fig.add_subplot(111)
-        self.ax2 = self.fig.add_subplot(111)
         # self.ax1 settings
-        self.line1 = Line2D([], [], color='green', linewidth=5)
-        self.line1_tail = Line2D([], [], color='green', linewidth=5)
-        self.line1_head = Line2D([], [], color='green', linewidth=5 )
+        self.line1 = Line2D([], [], color='green', linewidth=4)
+        self.line1_tail = Line2D([], [], color='green', linewidth=4)
+        self.line1_head = Line2D([], [], color='green', linewidth=4)
         self.ax1.add_line(self.line1)
         self.ax1.add_line(self.line1_tail)
         self.ax1.add_line(self.line1_head)
         self.ax1.set_xlim(0, self.xlim - 1)
         self.ax1.set_ylim(0, 100)
-        self.ax2.add_line(self.line1)
-        self.ax2.add_line(self.line1_tail)
-        self.ax2.add_line(self.line1_head)
-        self.ax2.set_xlim(0, self.xlim - 1)
-        self.ax2.set_ylim(0, 100)
-
         FigureCanvas.__init__(self, self.fig)
         TimedAnimation.__init__(self, self.fig, interval = 50, blit = True)
         return
@@ -94,13 +90,22 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         return iter(range(self.n.size))
 
     def _init_draw(self):
-        lines = [self.line1_head]
+        lines = [self.line1, self.line1_tail, self.line1_head]
         for l in lines:
             l.set_data([], [])
         return
 
     def addData(self, value):
         self.addedData.append(value)
+        return
+
+    def zoomIn(self, value):
+        bottom = self.ax1.get_ylim()[0]
+        top = self.ax1.get_ylim()[1]
+        bottom += value
+        top -= value
+        self.ax1.set_ylim(bottom,top)
+        self.draw()
         return
 
     def _step(self, *args):
@@ -115,11 +120,12 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         return
 
     def _draw_frame(self, framedata):
-        margin = -1
+        margin = -5
         while(len(self.addedData) > 0):
             self.y = np.roll(self.y, -1)
             self.y[-1] = self.addedData[0]
             del(self.addedData[0])
+
         self.line1.set_data(self.n[ 0 : self.n.size - margin ], self.y[ 0 : self.n.size - margin ])
         self.line1_tail.set_data(np.append(self.n[-10:-1 - margin], self.n[-1 - margin]), np.append(self.y[-10:-1 - margin], self.y[-1 - margin]))
         self.line1_head.set_data(self.n[-1 - margin], self.y[-1 - margin])
