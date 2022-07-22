@@ -1,3 +1,4 @@
+from atexit import register
 from random import random
 from turtle import width
 import pyformulas as pf
@@ -8,7 +9,17 @@ from scipy.ndimage.interpolation import shift
 import numpy as np
 from numpy import random
 import time
+import sys
+import pygame
+from pygame.locals import *
 
+#----------
+
+pygame.init()
+pygame.joystick.init()
+joysticks = [pygame.joystick.Joystick(i) for i in range(pygame.joystick.get_count())]
+for joystick in joysticks:
+    print(joystick.get_name())
 
 #----------
 
@@ -17,19 +28,45 @@ brake = np.zeros(100)
 clutch = np.zeros(100)
 steering = np.zeros(100)
 
+throttleval = 0
+brakeval = 0
+clutchval = 0
+steeringval = 0
+
 #----------
 
+def setThrottle(val):
+    global throttleval
+    throttleval=val
+
+def setBrake(val):
+    global brakeval
+    brakeval=val
+
+def setClutch(val):
+    global clutchval
+    clutchval=val
+
+def setSteering(val):
+    global steeringval
+    steeringval=val
+
+#----------
 def getThrottle():
-    return random.randint(100)
+    global throttleval
+    return throttleval
 
 def getBrake():
-    return random.randint(100)
+    global brakeval
+    return brakeval
 
 def getClutch():
-    return random.randint(100)
+    global clutchval
+    return clutchval
 
 def getSteering():
-    return random.randint(100)
+    global steeringval
+    return steeringval
 
 #----------
 
@@ -55,6 +92,22 @@ def UpdateSteering():
 
 #----------
 
+def ConvertAxis(val):
+    if(val>=0):
+        if(val % 10 != 1):
+            return (val*100 % 100/2)+50
+        else:
+            return 100
+    else:
+        if(val % 10 != -1):
+            return ((val*100 % 100)/2)
+        else:
+            return 0
+
+def ConvertAxis2(val):
+    return val % -96.8780517578125
+
+
 def UpdateAll():
     UpdateThrottle()
     UpdateBrake()
@@ -69,13 +122,25 @@ def main():
     fig = plt.figure()
     screen = pf.screen(title='Plot')
     x = np.linspace(0, 100, 100)
-    
+    registered = False
     start_time = time.time()
     z = 1 # displays the frame rate every 1 second
     counter = 0
+    stick = pygame.joystick.Joystick(0)
+    stick.init()
     while 1:
-        plt.cla()
+        setThrottle(ConvertAxis2(stick.get_axis(5)))
+        setBrake(ConvertAxis2(stick.get_axis(0)))
+        print("Throttle: ", stick.get_axis(5))
+        print("Brake: ", stick.get_axis(0))
+        #if not registered:
+            #setThrottle(0)
+
         UpdateAll()
+        registered = False
+
+        plt.cla()
+        #UpdateAll()
         #plt.xlim(t-3,t)
 
         plt.plot(x, steering, c='black', linewidth=3) #nero
@@ -96,7 +161,7 @@ def main():
 
         counter+=1
         if (time.time() - start_time) > z :
-            print("FPS: ", counter / (time.time() - start_time))
+            #print("FPS: ", counter / (time.time() - start_time))
             counter = 0
             start_time = time.time()
     #screen.close()
