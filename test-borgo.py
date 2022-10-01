@@ -81,6 +81,9 @@ class Value():
         self.values = [value]
 
 
+# iRating SDK initialization
+ir = irsdk.IRSDK()
+
 # Literal values
 UI_SCALING = 1
 FONT = {'name': 'Mont Heavy DEMO',
@@ -98,20 +101,16 @@ _values = [Value('Throttle',           color='green', type=float, buffer_size=10
 values = {v.name: v for v in _values}
 columns: Tuple[Value, Value, Value] = (values['Throttle'], values['Brake'], values['Clutch'])
 
-# iRating SDK initialization
-ir = irsdk.IRSDK()
-
 # GUI elements
-image_bg = PIL.Image.open("bg.png")
-image_wheel = PIL.Image.open("wheel.png")
-background_layout = [[sg.Image("bg.png", key='bg')]]
+image_bg = PIL.Image.open("./res/bg.png")
+image_wheel = PIL.Image.open("./res/wheel.png")
+background_layout = [[sg.Image(image_bg.filename,   key='bg')]]
 top_layout = [[sg.Graph((524,193),(0,-1),(min([v.buffer_size for v in values.values() if v.is_buffered])-1,100+1), key='graph', pad=((76,0),(13,0))),
                 sg.Graph((44,198),(0,0),(1,100+22), key='column1',      pad=((17,0),(0,0))),
                 sg.Graph((44,198),(0,0),(1,100+22), key='column2',      pad=((3,0),(0,0))),
                 sg.Graph((44,198),(0,0),(1,100+22), key='column3',      pad=((2,0),(0,0))),
                 sg.Graph((70,178),(0,0),(70,178),   key='text_overlay', pad=((3,0),(28,0))),
-                sg.Image("wheel.png",               key='wheel',        pad=((0,0),(0,0)))]]
-
+                sg.Image(image_wheel.filename,      key='wheel',        pad=((0,0),(0,0)))]]
 
 
 # Utility functions
@@ -163,7 +162,6 @@ def update_gui(top_window : sg.Window):
 
     # Render new frame
     top_window.refresh()
-
 
 
 def main():
