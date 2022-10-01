@@ -1,29 +1,32 @@
 import os
 import sys
-import irsdk
-import numpy as np
-import PySimpleGUI as sg
-import PIL.Image
-from typing import Any, Iterable, Tuple
 from io import BytesIO
 from time import sleep, time
+from collections import deque
+from typing import Any, Iterable, Tuple, List
+
+import irsdk
+import PIL.Image
+import PySimpleGUI as sg
 
 
 class Value():
     """Class to store a value from the iRacing SDK and relative metadata for its rendering within the UI"""
-    def __init__(self, name: str, color: str = 'white', range: Tuple[Any,Any] = (None,None), initial_value: Any = 0, type: np.dtype = np.int32, buffer_size: int = 1):
+    def __init__(self, name: str, color: str = 'white', range: Tuple[Any,Any] = (None,None), initial_value: Any = 0.0, type: Any = int, buffer_size: int = 1):
         self._name = name.strip()
         self._color = color.strip()
         self._range = (min(range), max(range)) if range[0] and range[1] else range
-        self._values = np.full(abs(buffer_size or 1), self._clamp(initial_value), dtype=type)
+        self._type = type
+        self._values = deque([self._clamp(initial_value)] * buffer_size, maxlen=buffer_size)
 
-    def _clamp(self, value) -> np.dtype:
-        "Restrict a value to the range defined at initialization"
-        range = self.range
-        if range[1] is not None:
-            value = min(range[1], value)
-        if range[0] is not None:
-            value = max(range[0], value)
+    def _clamp(self, value):
+        "Restrict a value to the range and type defined at initialization"
+        if not isinstance(value, self.type):
+            raise TypeError(f"Value {value} is not of type {self.type}")
+        if self.range[1] is not None:
+            value = min(self.range[1], value)
+        if self.range[0] is not None:
+            value = max(self.range[0], value)
         return value
 
     @property
@@ -39,7 +42,7 @@ class Value():
     @property
     def buffer_size(self) -> int:
         """Return the size of the buffer array"""
-        return self.values.size
+        return len(self.values)
 
     @property
     def is_buffered(self) -> bool:
@@ -52,30 +55,28 @@ class Value():
         return self._range
 
     @property
-    def type(self) -> np.dtype:
+    def type(self):
         """Return the data type of the value"""
-        return self.values.dtype
+        return self._type
 
     @property
-    def values(self) -> np.array:
+    def values(self) -> List[Any]:
         """Return the buffer containing all the values"""
         return self._values
 
     @values.setter
     def values(self, value: Iterable[Any]) -> None:
         """Set n values in the buffer, extra values will be discarded"""
-        array = np.array([self._clamp(v) for v in value[-self.buffer_size:]], dtype=self.type)
-        self._values = np.roll(self.values, -array.size)
-        indices = np.linspace(self.buffer_size - array.size, self.buffer_size - 1, array.size, dtype=np.int32)
-        np.put(self.values, indices, array)
+        for e in value:
+            self.values.append(self._clamp(e))
 
     @property
-    def value(self) -> np.dtype:
+    def value(self) -> Any:
         """Return the last value in the buffer"""
         return self.values[-1]
 
     @value.setter
-    def value(self, value: np.dtype) -> None:
+    def value(self, value: Any) -> None:
         """Set the last value in the buffer"""
         self.values = [value]
 
@@ -87,13 +88,13 @@ FONT = {'name': 'Mont Heavy DEMO',
         'color': '#FFFFFF'}
 
 # Tracked values
-_values = [Value('Throttle',           color='red', type=np.float32, buffer_size=100, range=(0,100)),
-            Value('Brake',              color='blue', type=np.float32, buffer_size=100, range=(0,100)),
-            Value('Clutch',             color='green', type=np.float32, buffer_size=100, range=(0,100)),
-            Value('SteeringWheelAngle', color='yellow', type=np.float32, buffer_size=100, range=(-180,180)),
-            Value('Speed',              initial_value=0, type=np.int16, range=(0, None)),
-            Value('Gear',               initial_value='N', type=np.str0),
-            Value('DisplayUnits',       initial_value="kph", type=np.object0)]
+_values = [Value('Throttle',           color='green', type=float, buffer_size=100, range=(0,100)),
+            Value('Brake',              color='red', type=float, buffer_size=100, range=(0,100)),
+            Value('Clutch',             color='blue', type=float, buffer_size=100, range=(0,100)),
+            Value('SteeringWheelAngle', color='white', type=float, buffer_size=100, range=(-180,180)),
+            Value('Speed',              initial_value=0, type=int, range=(0, None)),
+            Value('Gear',               initial_value='N', type=str),
+            Value('DisplayUnits',       initial_value="kph", type=str)]
 values = {v.name: v for v in _values}
 columns: Tuple[Value, Value, Value] = (values['Throttle'], values['Brake'], values['Clutch'])
 
