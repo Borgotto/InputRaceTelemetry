@@ -91,12 +91,12 @@ FONT = {'name': 'Mont Heavy DEMO',
         'color': '#FFFFFF'}
 
 # Tracked values
-_values = [Value('Throttle',           color='green', type=float, buffer_size=100, range=(0,100)),
-            Value('Brake',              color='red', type=float, buffer_size=100, range=(0,100)),
-            Value('Clutch',             color='blue', type=float, buffer_size=100, range=(0,100)),
-            Value('SteeringWheelAngle', color='white', type=float, buffer_size=100, range=(-180,180)),
-            Value('Speed',              initial_value=0, type=int, range=(0, None)),
-            Value('Gear',               initial_value='N', type=str),
+_values = [Value('Throttle',           color='green',        type=float, range=(0,100),    buffer_size=100),
+            Value('Brake',              color='red',         type=float, range=(0,100),    buffer_size=100),
+            Value('Clutch',             color='blue',        type=float, range=(0,100),    buffer_size=100),
+            Value('SteeringWheelAngle', color='white',       type=float, range=(-180,180), buffer_size=100),
+            Value('Speed',              initial_value=0,     type=int,   range=(0, None)),
+            Value('Gear',               initial_value='N',   type=str),
             Value('DisplayUnits',       initial_value="kph", type=str)]
 values = {v.name: v for v in _values}
 columns: Tuple[Value, Value, Value] = (values['Throttle'], values['Brake'], values['Clutch'])
@@ -105,7 +105,7 @@ columns: Tuple[Value, Value, Value] = (values['Throttle'], values['Brake'], valu
 image_bg = PIL.Image.open("./res/bg.png")
 image_wheel = PIL.Image.open("./res/wheel.png")
 background_layout = [[sg.Image(image_bg.filename,   key='bg')]]
-top_layout = [[sg.Graph((524,193),(0,-1),(min([v.buffer_size for v in values.values() if v.is_buffered])-1,100+1), key='graph', pad=((76,0),(13,0))),
+top_layout = [[sg.Graph((524,193),(0,-1),(1048-1,386+1), key='graph',   pad=((76,0),(13,0))),
                 sg.Graph((44,198),(0,0),(1,100+22), key='column1',      pad=((17,0),(0,0))),
                 sg.Graph((44,198),(0,0),(1,100+22), key='column2',      pad=((3,0),(0,0))),
                 sg.Graph((44,198),(0,0),(1,100+22), key='column3',      pad=((2,0),(0,0))),
@@ -142,13 +142,15 @@ def update_gui(top_window : sg.Window):
     # Draw all buffered values on the main graph
     graph: sg.Graph = top_window['graph']
     for v in [v for v in values.values() if v.is_buffered]:
-        graph.draw_lines([(i, v.values[i]) for i in range(v.buffer_size)], color=v.color, width=4)
+        scaling = {'x': graph.TopRight[0]/(v.buffer_size-1), 'y': graph.TopRight[1]/(sum(abs(x) for x in v.range))}
+        lines = [(i * scaling['x'], (v.values[i] + abs(v.range[0])) * scaling['y']) for i in range(v.buffer_size)]
+        graph.draw_lines(lines, color=v.color, width=4)
 
     # Draw Throttle, Brake and Clutch on their own column graphs
-
     for v, g in zip([values['Throttle'], values['Brake'], values['Clutch']], [top_window['column1'], top_window['column2'], top_window['column3']]):
-        g.draw_text(str(int(v.value)), (g.TopRight[0]/2, (g.TopRight[1]-v.range[1])/2+v.range[1]), color=FONT['color'] if int(v.value) >= v.range[1] else _darken_color(FONT['color']), font=(FONT['name'], int(g.CanvasSize[0]/2.8)))
-        g.draw_line((g.TopRight[0]/2, 0), (g.TopRight[0]/2, v.value), color=v.color, width=30)
+        scaling = {'x': g.TopRight[0]/2, 'y': (g.TopRight[1]-22)/(sum(abs(x) for x in v.range))}
+        g.draw_text(str(int(v.value)), (scaling['x'], (g.TopRight[1] - 100*scaling['y'])/2 + 100*scaling['y']), color=FONT['color'] if int(v.value) >= v.range[1] else _darken_color(FONT['color']), font=(FONT['name'], int(g.CanvasSize[0]/2.8)))
+        g.draw_line((scaling['x'], 0), (scaling['x'], scaling['y'] * v.value), color=v.color, width=30)
 
     # Draw Gear, Unit and Speed on text_overlay graph
     graph = top_window['text_overlay']
