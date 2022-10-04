@@ -85,44 +85,37 @@ class Value():
 ir = irsdk.IRSDK()
 
 # Literal values
-UI_SCALING = 1
+UI_SCALE = 1
+LINE_WIDTH = 4 * UI_SCALE
 FONT = {'name': 'Mont Heavy DEMO',
         'size': 22,
         'color': '#FFFFFF'}
 
 # Tracked values
-_values = [Value('Throttle',           color='green',        type=float, range=(0,100),    buffer_size=100),
-            Value('Brake',              color='red',         type=float, range=(0,100),    buffer_size=100),
-            Value('Clutch',             color='blue',        type=float, range=(0,100),    buffer_size=100),
-            Value('SteeringWheelAngle', color='white',       type=float, range=(-180,180), buffer_size=100),
+_values = [ Value('Throttle',           color='green',       type=float, range=(0,100),        buffer_size=100),
+            Value('Brake',              color='red',         type=float, range=(0,100),        buffer_size=100),
+            Value('Clutch',             color='blue',        type=float, range=(0,100),        buffer_size=100),
+            Value('SteeringWheelAngle', color='white',       type=float, range=(-180.0,180.0), buffer_size=100),
             Value('Speed',              initial_value=0,     type=int,   range=(0, None)),
             Value('Gear',               initial_value='N',   type=str),
             Value('DisplayUnits',       initial_value="kph", type=str)]
 values = {v.name: v for v in _values}
 columns: Tuple[Value, Value, Value] = (values['Throttle'], values['Brake'], values['Clutch'])
 
-# GUI elements
-image_bg = PIL.Image.open("./res/bg.png")
-image_wheel = PIL.Image.open("./res/wheel.png")
-background_layout = [[sg.Image(image_bg.filename,   key='bg')]]
-top_layout = [[sg.Graph((524,193),(0,-1),(1048-1,386+1), key='graph',   pad=((76,0),(13,0))),
-                sg.Graph((44,198),(0,0),(1,100+22), key='column1',      pad=((17,0),(0,0))),
-                sg.Graph((44,198),(0,0),(1,100+22), key='column2',      pad=((3,0),(0,0))),
-                sg.Graph((44,198),(0,0),(1,100+22), key='column3',      pad=((2,0),(0,0))),
-                sg.Graph((70,178),(0,0),(70,178),   key='text_overlay', pad=((3,0),(28,0))),
-                sg.Image(image_wheel.filename,      key='wheel',        pad=((0,0),(0,0)))]]
-
-
 # Utility functions
-def _make_borderless_window(layout, title):
+def make_borderless_window(layout, title):
     """Create a borderless window given a layout and a title"""
     return sg.Window(title,layout,no_titlebar=True,keep_on_top=True,grab_anywhere=True,resizable=False,alpha_channel=0.8,transparent_color=sg.theme_background_color(),margins=(0, 0),element_padding=(0,0))
 
-def _darken_color(color : str):
+def darken_color(color : str):
     """Darken a color by 50% (str format should be '#RRGGBB' or 'RRGGBB')"""
     return '#'+hex(int((int(color[1:] if color.startswith('#') else color,16)+int('6f6f6f',16))/2))[2:]
 
-def _image_to_bytes(image: PIL.Image):
+def scale_image(img : PIL.Image, value):
+    """Resize image dimensions based on value"""
+    return img.resize((int(img.width*value),int(img.height*value)))
+
+def image_to_bytes(image: PIL.Image):
     """Convert a PIL.Image to bytes"""
     bio = BytesIO()
     image.save(bio, format="PNG")
@@ -140,16 +133,16 @@ def update_gui(top_window : sg.Window):
     [e.erase() for e in top_window.AllKeysDict.values() if isinstance(e, sg.Graph)]
 
     # Draw all buffered values on the main graph
-    graph: sg.Graph = top_window['graph']
+    graph = top_window['graph']
     for v in [v for v in values.values() if v.is_buffered]:
-        scaling = {'x': graph.TopRight[0]/(v.buffer_size-1), 'y': graph.TopRight[1]/(sum(abs(x) for x in v.range))}
+        scaling = {'x': graph.TopRight[0]/(v.buffer_size-1), 'y': (graph.TopRight[1]-LINE_WIDTH)/(sum(abs(x) for x in v.range))}
         lines = [(i * scaling['x'], (v.values[i] + abs(v.range[0])) * scaling['y']) for i in range(v.buffer_size)]
-        graph.draw_lines(lines, color=v.color, width=4)
+        graph.draw_lines(lines, color=v.color, width=abs(int(LINE_WIDTH)))
 
     # Draw Throttle, Brake and Clutch on their own column graphs
     for v, g in zip([values['Throttle'], values['Brake'], values['Clutch']], [top_window['column1'], top_window['column2'], top_window['column3']]):
         scaling = {'x': g.TopRight[0]/2, 'y': (g.TopRight[1]-22)/(sum(abs(x) for x in v.range))}
-        g.draw_text(str(int(v.value)), (scaling['x'], (g.TopRight[1] - 100*scaling['y'])/2 + 100*scaling['y']), color=FONT['color'] if int(v.value) >= v.range[1] else _darken_color(FONT['color']), font=(FONT['name'], int(g.CanvasSize[0]/2.8)))
+        g.draw_text(str(int(v.value)), (scaling['x'], (g.TopRight[1] - 100*scaling['y'])/2 + 100*scaling['y']), color=FONT['color'] if int(v.value) >= v.range[1] else darken_color(FONT['color']), font=(FONT['name'], int(g.CanvasSize[0]/2.8)))
         g.draw_line((scaling['x'], 0), (scaling['x'], scaling['y'] * v.value), color=v.color, width=30)
 
     # Draw Gear, Unit and Speed on text_overlay graph
@@ -159,18 +152,27 @@ def update_gui(top_window : sg.Window):
     graph.draw_text(str(values['Speed'].value), (FONT['size']*2, 0), color=FONT['color'], font=(FONT['name'],FONT['size']), text_location=sg.TEXT_LOCATION_BOTTOM_RIGHT)
 
     # Rotate wheel image
-    image: sg.Image = top_window['wheel']
-    image.update(_image_to_bytes(image_wheel.rotate(values['SteeringWheelAngle'].value or 0)))
+    image = top_window['wheel']
+    #TODO: fix image reference
+    #image.update(image_to_bytes(image_wheel.rotate(values['SteeringWheelAngle'].value or 0)))
 
     # Render new frame
     top_window.refresh()
 
-
 def main():
     # Setup GUI
+    image_bg = scale_image(PIL.Image.open("./res/background.png"), UI_SCALE)
+    image_wheel = scale_image(PIL.Image.open("./res/wheel.png"), UI_SCALE)
+    background_layout = [[sg.Image(image_to_bytes(image_bg), key='bg')]]
+    top_layout = [[ sg.Graph((524,193),(0,-LINE_WIDTH),(1048-1,386), key='graph',        pad=((76,0),(13,0))),
+                    sg.Graph((44,198),(0,0),(1,100+22),              key='column1',      pad=((17,0),(0,0))),
+                    sg.Graph((44,198),(0,0),(1,100+22),              key='column2',      pad=((3,0),(0,0))),
+                    sg.Graph((44,198),(0,0),(1,100+22),              key='column3',      pad=((2,0),(0,0))),
+                    sg.Graph((70,178),(0,0),(70,178),                key='text_overlay', pad=((3,0),(28,0))),
+                    sg.Image(image_to_bytes(image_wheel), key='wheel', pad=((0,0),(0,0)))]]
     sg.Window._move_all_windows = True
-    background_window = _make_borderless_window(background_layout, 'Background')
-    top_window = _make_borderless_window(top_layout, 'Telemetry')
+    background_window = make_borderless_window(background_layout, 'Background')
+    top_window = make_borderless_window(top_layout, 'Telemetry')
     # Show windows
     background_window.finalize()
     top_window.finalize()
