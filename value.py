@@ -8,7 +8,8 @@ class Value():
         self._color = color.strip()
         self._range = (min(range), max(range)) if range[0] and range[1] else range
         self._type = type
-        self._values = deque([self._clamp(initial_value)] * buffer_size, maxlen=buffer_size)
+        self._initial_value = self._clamp(initial_value)
+        self._values = deque([self._initial_value] * buffer_size, maxlen=buffer_size)
 
     def _clamp(self, value):
         "Restrict a value to the range and type defined at initialization"
@@ -35,6 +36,11 @@ class Value():
     def buffer_size(self) -> int:
         """Return the size of the buffer array"""
         return len(self.values)
+
+    @buffer_size.setter
+    def buffer_size(self, size: int) -> None:
+        """Set the size of the buffer array"""
+        self._values = deque([self._initial_value] * size, maxlen=size)
 
     @property
     def is_buffered(self) -> bool:
