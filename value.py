@@ -52,6 +52,11 @@ class Value():
         """Return the value range"""
         return self._range
 
+    @range.setter
+    def range(self, range: Tuple[Any,Any]) -> None:
+        """Set the value range"""
+        self._range = (min(range), max(range)) if range[0] and range[1] else range
+
     @property
     def type(self):
         """Return the data type of the value"""
