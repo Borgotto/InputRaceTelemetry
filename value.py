@@ -70,7 +70,7 @@ class Value():
     @values.setter
     def values(self, value: Iterable[Any]) -> None:
         """Set n values in the buffer, extra values will be discarded"""
-        for e in value:
+        for e in value[:self.buffer_size]:
             self.values.append(self._clamp(e))
 
     @property

@@ -98,7 +98,7 @@ class Gui():
 
         # Rotate wheel image
         image: sg.Image = window['wheel']
-        image.update(Gui.transform(self.image_wheel, rotate=values['SteeringWheelAngle'].value or 0.0))
+        image.update(Gui.transform(self.image_wheel, rotate=values['SteeringWheelAngle'].value))
 
         # Render new frame
         window.refresh()
