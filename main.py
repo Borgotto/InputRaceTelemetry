@@ -20,7 +20,7 @@ FONT = {'name': 'Mont Heavy DEMO',
 
 def main():
     # Setup iRacing SDK
-    ir = IRSDK() if not DEBUG else type('irsdk.IRSDK', (object,), {'__getitem__': lambda self, value: getattr(self, value),'startup': lambda self: True,'is_initialized': True,'is_connected': True,'FrameRate': 60,'Throttle': 100.0,'Brake': 93.0,'Clutch': 15.0,'SteeringWheelAngle': 168.0,'Speed': 200,'Gear': '3','DisplayUnits': 'kmh',})()
+    ir = IRSDK() if not DEBUG else type('irsdk.IRSDK', (object,), {'__getitem__': lambda self, value: getattr(self, value),'startup': lambda self: True,'is_initialized': True,'is_connected': True,'FrameRate': 59.98,'Throttle': 1.0,'Brake': 0.93,'Clutch': 0.75,'SteeringWheelAngle': 3.333,'Speed': 200,'Gear': 0,'DisplayUnits': 0,'SteeringWheelAngleMax': 7.2})()
     print("Waiting for iRacing...")
     sys.stdout = open(os.devnull, "w")      # suppress irsdk output
     while not ir.startup(): time.sleep(0.5) # wait for sdk to connect
