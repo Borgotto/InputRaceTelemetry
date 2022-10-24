@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import math
 
 from irsdk import IRSDK
 from gui import Gui
@@ -28,14 +29,14 @@ def main():
     print("Startup successful")
 
     # iRacing values to be tracked, buffered values will be rendered in a graph
-    framerate = ir['FrameRate']
-    _values = [ Value('Throttle',           color='green',       type=float, range=(0.0,100.0),    buffer_size=framerate),
-                Value('Brake',              color='red',         type=float, range=(0.0,100.0),    buffer_size=framerate),
-                Value('Clutch',             color='blue',        type=float, range=(0.0,100.0),    buffer_size=framerate),
-                Value('SteeringWheelAngle', color='white',       type=float, range=(-180.0,180.0), buffer_size=framerate),
-                Value('Speed',              initial_value=0,     type=int,   range=(0, None)),
-                Value('Gear',               initial_value='N',   type=str),
-                Value('DisplayUnits',       initial_value="kph", type=str)]
+    buff_size = 100
+    _values = [ Value('Throttle',           color='green', type=float, range=(0.0, 1.0), buffer_size=buff_size),
+                Value('Brake',              color='red',   type=float, range=(0.0, 1.0), buffer_size=buff_size),
+                Value('Clutch',             color='blue',  type=float, range=(0.0, 1.0), buffer_size=buff_size, convert_func=lambda v: 1-v),
+                Value('SteeringWheelAngle', color='white', type=float, buffer_size=buff_size, convert_func=lambda v: math.degrees(v)),
+                Value('Speed',              type=int, range=(0, None)),
+                Value('Gear',               type=str, convert_func=lambda v: {'0':'N','-1':'R'}.get(v,v)),
+                Value('DisplayUnits',       type=str, convert_func=lambda v: {'0':'mph','1':'kph'}.get(v,v))]
     # Values dictionary
     values = {v.name: v for v in _values}
     # Tuple of 3 Values to be displayed in columns
@@ -47,6 +48,8 @@ def main():
 
     # Main loop
     while ir.is_connected:
+        framerate = ir['FrameRate']
+        values['SteeringWheelAngle'].range = (math.degrees(-ir['SteeringWheelAngleMax']/2), math.degrees(ir['SteeringWheelAngleMax']/2))
         start = time.time()                                 # start frame calculation time
         for v in _values: v.value = ir[v.name]              # update values from iRacing
         gui.update(values, columns)                         # update GUI with new values

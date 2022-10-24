@@ -3,23 +3,23 @@ from typing import Any, Iterable, Tuple, List
 
 class Value():
     """Class to store a value from the iRacing SDK and relative metadata for its rendering within the UI"""
-    def __init__(self, name: str, color: str = 'white', range: Tuple[Any,Any] = (None,None), initial_value: Any = 0.0, type: Any = int, buffer_size: int = 1):
+    def __init__(self, name: str, color: str = 'white', range: Tuple[Any,Any] = (None,None), initial_value: Any = 0.0, type: Any = int, buffer_size: int = 1, convert_func = lambda v: v) -> None:
         self._name = name.strip()
         self._color = color.strip()
-        self._range = (min(range), max(range)) if range[0] and range[1] else range
         self._type = type
+        self._convert_func = convert_func
+        self._range = (min(range), max(range)) if range[0] and range[1] else range
         self._initial_value = self._clamp(initial_value)
         self._values = deque([self._initial_value] * buffer_size, maxlen=buffer_size)
 
     def _clamp(self, value):
         "Restrict a value to the range and type defined at initialization"
-        if not isinstance(value, self.type):
-            raise TypeError(f"Value {value} is not of type {self.type}")
-        range = self.range
-        if range[1] is not None:
-            value = min(range[1], value)
-        if range[0] is not None:
-            value = max(range[0], value)
+        value = self.type(value)
+        value = self._convert_func(value)
+        if self.range[1] is not None:
+            value = min(self.range[1], value)
+        if self.range[0] is not None:
+            value = max(self.range[0], value)
         return value
 
     @property
