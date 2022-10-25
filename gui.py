@@ -9,15 +9,15 @@ from value import Value
 class Gui():
     def __init__(self, scale: Union[float,int] = 1.0, line_width: Union[float,int] = 4, font: Dict[str,Union[int,str]] = {'name': 'Mont Heavy DEMO', 'size': 22, 'color': '#FFFFFF'}, transparency: Union[float,int] = 0.8):
         # try to import custom font
-        try: pyglet.font.add_file(path.join(path.dirname(__file__), 'res', 'Mont-HeavyDEMO.otf'))
+        try: pyglet.font.add_file(path.join('res', 'Mont-HeavyDEMO.otf'))
         except: pass
         # vars
         self.scale = abs(scale)
         self.line_width = line_width * self.scale
         self.font = {'name': font['name'].strip(), 'size': int(font['size']*self.scale), 'color': font['color'].strip()}
         self.transparency = max(min(1.0, transparency), 0.01)
-        self.image_bg = Gui.transform(path.join(path.dirname(__file__),    'res', "background.png"), scale=self.scale)
-        self.image_wheel = Gui.transform(path.join(path.dirname(__file__), 'res', "wheel.png"),      scale=self.scale)
+        self.image_bg = Gui.transform(path.join('res', "background.png"), scale=self.scale)
+        self.image_wheel = Gui.transform(path.join('res', "wheel.png"), scale=self.scale)
         # gui layouts
         graph_dim = (int(524*self.scale), int(193*self.scale)), (int(1048*self.scale), int(386*self.scale))
         column_dim = (int(44*self.scale), int(198*self.scale)), (1, int((100+22)*self.scale))
