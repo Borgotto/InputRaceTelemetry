@@ -1,9 +1,9 @@
 from collections import deque
-from typing import Any, Iterable, Tuple, List
+from typing import Any, Iterable, Tuple, List, Callable
 
 class Value():
     """Class to store a value from the iRacing SDK and relative metadata for its rendering within the UI"""
-    def __init__(self, name: str, color: str = 'white', range: Tuple[Any,Any] = (None,None), initial_value: Any = 0.0, type: Any = int, buffer_size: int = 1, convert_func = lambda v: v) -> None:
+    def __init__(self, name: str, color: str = 'white', range: Tuple[Any,Any] = (None,None), initial_value: Any = 0.0, type: Any = int, buffer_size: int = 1, convert_func: Callable = None) -> None:
         self._name = name.strip()
         self._color = color.strip()
         self._type = type
@@ -15,7 +15,8 @@ class Value():
     def _clamp(self, value):
         "Restrict a value to the range and type defined at initialization"
         value = self.type(value)
-        value = self._convert_func(value)
+        if self._convert_func:
+            value = self._convert_func(value)
         if self.range[1] is not None:
             value = min(self.range[1], value)
         if self.range[0] is not None:
