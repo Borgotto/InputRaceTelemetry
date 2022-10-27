@@ -93,8 +93,8 @@ class Gui():
         # Draw Gear, Unit and Speed on text_overlay graph
         graph: sg.Graph = window['text_overlay']
         graph.draw_text(values["Gear"].value,         (0, graph.TopRight[1]), color=font['color'], font=(font['name'],font['size']+int(8*self.scale)), text_location=sg.TEXT_LOCATION_TOP_LEFT)
-        graph.draw_text(values['DisplayUnits'].value, (0, font['size']*1.5),  color=font['color'], font=(font['name'],int(font['size']/1.5 )),         text_location=sg.TEXT_LOCATION_BOTTOM_LEFT)
-        graph.draw_text(values['Speed'].value,        (font['size']*2.5, 0),  color=font['color'], font=(font['name'],font['size']),                   text_location=sg.TEXT_LOCATION_BOTTOM_RIGHT)
+        graph.draw_text(values['DisplayUnits'].value, (font['size']*2, font['size']*1.5), color=font['color'], font=(font['name'],int(font['size']/1.5)), text_location=sg.TEXT_LOCATION_BOTTOM_RIGHT)
+        graph.draw_text(values['Speed'].value,        (font['size']*2.5, 0), color=font['color'], font=(font['name'],font['size']), text_location=sg.TEXT_LOCATION_BOTTOM_RIGHT)
 
         # Rotate wheel image
         image: sg.Image = window['wheel']
