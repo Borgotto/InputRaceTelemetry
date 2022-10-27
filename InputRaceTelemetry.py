@@ -19,6 +19,7 @@ TRANSPARENCY = 0.8
 FONT = {'name': 'Mont Heavy',
         'size': 22,
         'color': '#FFFFFF'}
+TARGET_FRAME_RATE = 1
 
 def main():
     # Setup iRacing SDK
@@ -30,7 +31,7 @@ def main():
     print("Startup successful")
 
     # iRacing values to be tracked, buffered values will be rendered in a graph
-    framerate = 60 or int(ir['FrameRate'])
+    framerate = TARGET_FRAME_RATE or ir['FrameRate']
     buff_size = framerate * 2
     _values = [ Value('Throttle',           color='green', type=float, range=(0.0, 1.0), buffer_size=buff_size),
                 Value('Brake',              color='red',   type=float, range=(0.0, 1.0), buffer_size=buff_size),
@@ -50,7 +51,7 @@ def main():
 
     # Main loop
     while ir.is_connected:
-        framerate = 60 or int(ir['FrameRate'])
+        framerate = TARGET_FRAME_RATE or ir['FrameRate']
         values['SteeringWheelAngle'].range = (math.degrees(-ir['SteeringWheelAngleMax']/2), math.degrees(ir['SteeringWheelAngleMax']/2))
         start = time.time()                                 # start frame calculation time
         for v in _values: v.value = ir[v.name]              # update values from iRacing
