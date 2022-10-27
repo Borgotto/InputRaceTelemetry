@@ -37,7 +37,7 @@ def main():
                 Value('Brake',              color='red',   type=float, range=(0.0, 1.0), buffer_size=buff_size),
                 Value('Clutch',             color='blue',  type=float, range=(0.0, 1.0), buffer_size=buff_size, convert_func=lambda v: 1-v),
                 Value('SteeringWheelAngle', color='white', type=float, buffer_size=buff_size, convert_func=lambda v: math.degrees(v)),
-                Value('Speed',              type=float, range=(0, None), convert_func=lambda v: round(v*3.6)),
+                Value('Speed',              type=float, range=(0, 9999), convert_func=lambda v: round(v*3.6)),
                 Value('Gear',               type=str, convert_func=lambda v: {'0':'N','-1':'R'}.get(v,v)),
                 Value('DisplayUnits',       type=str, convert_func=lambda v: {'0':'mph','1':'kph'}.get(v,v))]
     # Values dictionary
