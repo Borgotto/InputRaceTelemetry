@@ -28,7 +28,7 @@ class Gui():
                         sg.Graph(column_dim[0],    (0,0),                column_dim[1],    key='column2',      pad=((round(2.6*self.scale),0),(0,0))),
                         sg.Graph(column_dim[0],    (0,0),                column_dim[1],    key='column3',      pad=((round(1.4*self.scale),0),(0,0))),
                         sg.Graph(text_overlay_dim, (0,0),                text_overlay_dim, key='text_overlay', pad=((round(3*self.scale),  0),(round(28*self.scale),0))),
-                        sg.Image(self.image_wheel, key='wheel')]]
+                        sg.Image(self.image_wheel, key='wheel', pad=((0,0),(round(14*self.scale),0)))]]
         # gui windows
         sg.Window._move_all_windows = True
         self.foreground_window = sg.Window('Telemetry', top_layout,       no_titlebar=True,keep_on_top=True,grab_anywhere=True,resizable=False,alpha_channel=self.transparency,transparent_color=sg.theme_background_color(),margins=(0, 0),element_padding=(0,0))
