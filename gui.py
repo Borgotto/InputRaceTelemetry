@@ -7,9 +7,9 @@ import pyglet
 from value import Value
 
 class Gui():
-    def __init__(self, scale: Union[float,int] = 1.0, line_width: Union[float,int] = 4, font: Dict[str,Union[int,str]] = {'name': 'Mont Heavy DEMO', 'size': 22, 'color': '#FFFFFF'}, transparency: Union[float,int] = 0.8):
+    def __init__(self, scale: Union[float,int] = 1.0, line_width: Union[float,int] = 4, font: Dict[str,Union[int,str]] = {'name': 'Mont Heavy', 'size': 22, 'color': '#FFFFFF'}, transparency: Union[float,int] = 0.8):
         # try to import custom font
-        try: pyglet.font.add_file(path.join('res', 'Mont-HeavyDEMO.otf'))
+        try: pyglet.font.add_file(path.join('res', 'Mont-Heavy.otf'))
         except: pass
         # vars
         self.scale = abs(scale)

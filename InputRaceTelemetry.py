@@ -16,7 +16,7 @@ else:
 UI_SCALE = 1
 LINE_WIDTH = 4
 TRANSPARENCY = 0.8
-FONT = {'name': 'Mont Heavy DEMO',
+FONT = {'name': 'Mont Heavy',
         'size': 22,
         'color': '#FFFFFF'}
 
