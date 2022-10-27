@@ -17,7 +17,7 @@ class Gui():
         self.font = {'name': font['name'].strip(), 'size': int(font['size']*self.scale), 'color': font['color'].strip()}
         self.transparency = max(min(1.0, transparency), 0.01)
         self.image_bg = Gui.transform(path.join('res', "background.png"), scale=self.scale)
-        self.image_wheel = Gui.transform(path.join('res', "wheel.png"), scale=self.scale)
+        self.image_wheel = Gui.transform(path.join('res', "wheel.png"), scale=self.scale/11)
         # gui layouts
         graph_dim = (int(524*self.scale), int(193*self.scale)), (int(1048*self.scale), int(386*self.scale))
         column_dim = (int(44*self.scale), int(198*self.scale)), (1, int((100+22)*self.scale))
