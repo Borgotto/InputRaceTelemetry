@@ -7,7 +7,7 @@ class IRSDK():
         self.Brake = 0.93
         self.Clutch = 0.75
         self.SteeringWheelAngle = 3.333
-        self.Speed = 200
+        self.Speed = 0
         self.Gear = 0
         self.DisplayUnits = 0
         self.SteeringWheelAngleMax = 7.2
@@ -15,3 +15,5 @@ class IRSDK():
         return True
     def __getitem__(self, key):
         return getattr(self, key)
+    def __setitem__(self, key, value):
+        return setattr(self, key, value)
