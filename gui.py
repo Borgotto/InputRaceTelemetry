@@ -21,7 +21,7 @@ class Gui():
         # gui layouts
         graph_dim = (int(524*self.scale), int(193*self.scale)), (int(1048*self.scale), int(386*self.scale))
         column_dim = (int(44*self.scale), int(198*self.scale)), (1, int((100+22)*self.scale))
-        text_overlay_dim = (int(70*self.scale), int(178*self.scale))
+        text_overlay_dim = (int(76*self.scale), int(178*self.scale))
         background_layout = [[sg.Image(self.image_bg, key='bg', enable_events=True)]]
         top_layout = [[ sg.Graph(graph_dim[0],     (0,-self.line_width), graph_dim[1],     key='graph',        pad=((round(76*self.scale), 0),(round(13*self.scale),0))),
                         sg.Graph(column_dim[0],    (0,0),                column_dim[1],    key='column1',      pad=((round(17*self.scale), 0),(0,0))),
@@ -92,9 +92,9 @@ class Gui():
 
         # Draw Gear, Unit and Speed on text_overlay graph
         graph: sg.Graph = window['text_overlay']
-        graph.draw_text(values["Gear"].value,         (0, graph.TopRight[1]), color=font['color'], font=(font['name'],font['size']+int(8*self.scale)), text_location=sg.TEXT_LOCATION_TOP_LEFT)
-        graph.draw_text(values['DisplayUnits'].value, (font['size']*2, font['size']*1.5), color=font['color'], font=(font['name'],int(font['size']/1.5)), text_location=sg.TEXT_LOCATION_BOTTOM_RIGHT)
-        graph.draw_text(values['Speed'].value,        (font['size']*2.5, 0), color=font['color'], font=(font['name'],font['size']), text_location=sg.TEXT_LOCATION_BOTTOM_RIGHT)
+        graph.draw_text(values["Gear"].value,                (0, graph.TopRight[1]), color=font['color'], font=(font['name'],font['size']+int(8*self.scale)), text_location=sg.TEXT_LOCATION_TOP_LEFT)
+        graph.draw_text(values['DisplayUnits'].value,        (0, font['size']*1.5), color=font['color'], font=(font['name'],int(font['size']/1.5)), text_location=sg.TEXT_LOCATION_BOTTOM_LEFT)
+        graph.draw_text(str(values['Speed'].value).rjust(3), (0, 0), color=font['color'], font=(font['name'],font['size']), text_location=sg.TEXT_LOCATION_BOTTOM_LEFT)
 
         # Rotate wheel image
         image: sg.Image = window['wheel']
