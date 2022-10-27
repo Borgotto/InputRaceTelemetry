@@ -46,9 +46,9 @@ class Gui():
             new_width, new_height = resize
             scale = min(new_height / cur_height, new_width / cur_width)
         if scale:
-            img = img.resize((int(cur_width * scale), int(cur_height * scale)), PIL.Image.ANTIALIAS)
+            img = img.resize((int(cur_width * scale), int(cur_height * scale)), PIL.Image.BICUBIC)
         if rotate:
-            img = img.rotate(rotate, resample=PIL.Image.BICUBIC)
+            img = img.rotate(rotate, resample=PIL.Image.NEAREST)
         with BytesIO() as bio:
             img.save(bio, format="PNG")
             del img
