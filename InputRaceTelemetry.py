@@ -57,7 +57,7 @@ def main():
         for v in _values: v.value = ir[v.name]              # update values from iRacing
         gui.update(values, columns)                         # update GUI with new values
         stop = time.time()                                  # stop frame time
-        time.sleep(1/framerate - time.time() % 1/framerate) # sleep until next frame
+        time.sleep(max(1/framerate - (stop-start), 0))      # sleep until next frame
 
         if DEBUG:                                           # print debug info
             print(f"{((stop-start)*1000):.3f}ms - {(1/(stop-start+.0000001)):.0f}fps", f"- Frame took too long to render (should be < {((1/framerate)*1000):.3f}ms)" if round(stop-start,3) > round(1/framerate,3) else "")
