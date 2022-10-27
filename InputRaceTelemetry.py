@@ -30,7 +30,8 @@ def main():
     print("Startup successful")
 
     # iRacing values to be tracked, buffered values will be rendered in a graph
-    buff_size = 100
+    framerate = 60 or int(ir['FrameRate'])
+    buff_size = framerate * 2
     _values = [ Value('Throttle',           color='green', type=float, range=(0.0, 1.0), buffer_size=buff_size),
                 Value('Brake',              color='red',   type=float, range=(0.0, 1.0), buffer_size=buff_size),
                 Value('Clutch',             color='blue',  type=float, range=(0.0, 1.0), buffer_size=buff_size, convert_func=lambda v: 1-v),
@@ -49,7 +50,7 @@ def main():
 
     # Main loop
     while ir.is_connected:
-        framerate = ir['FrameRate']
+        framerate = 60 or int(ir['FrameRate'])
         values['SteeringWheelAngle'].range = (math.degrees(-ir['SteeringWheelAngleMax']/2), math.degrees(ir['SteeringWheelAngleMax']/2))
         start = time.time()                                 # start frame calculation time
         for v in _values: v.value = ir[v.name]              # update values from iRacing
