@@ -87,7 +87,7 @@ class Gui():
         # Draw passed columns Values on the ui columns
         for v, g in zip(columns, [window['column1'], window['column2'], window['column3']]):
             scaling = {'x': g.TopRight[0]/2, 'y': (g.TopRight[1]-round(22*self.scale))/(sum(abs(x) for x in v.range))}
-            g.draw_text(int(v.value),      (scaling['x'], (g.TopRight[1] - 100*scaling['y'])/2 + 100*scaling['y']), color=font['color'] if int(v.value) >= v.range[1] else Gui.darken_color(font['color']), font=(font['name'], int(g.CanvasSize[0]/2.8)))
+            g.draw_text(round(v.value / (sum(abs(x) for x in v.range))*100), (scaling['x'], (g.TopRight[1] - scaling['y'])/2 + scaling['y']), color=font['color'] if int(v.value) >= v.range[1] else Gui.darken_color(font['color']), font=(font['name'], int(g.CanvasSize[0]/2.8)))
             g.draw_line((scaling['x'], 0), (scaling['x'], scaling['y'] * v.value),                                  color=v.color, width=round(30*self.scale))
 
         # Draw Gear, Unit and Speed on text_overlay graph
