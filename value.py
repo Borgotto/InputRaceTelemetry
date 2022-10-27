@@ -10,7 +10,7 @@ class Value():
         self._convert_func = convert_func
         self._range = (min(range), max(range)) if range[0] and range[1] else range
         self._initial_value = self._clamp(initial_value)
-        self._values = deque([self._initial_value] * buffer_size, maxlen=buffer_size)
+        self._values = deque([self._initial_value] * int(buffer_size), maxlen=int(buffer_size))
 
     def _clamp(self, value):
         "Restrict a value to the range and type defined at initialization"
