@@ -1,5 +1,5 @@
 class IRSDK():
-    def __init__(self) -> None:
+    def __init__(self, parse_yaml_async=False) -> None:
         self.is_initialized = True
         self.is_connected = True
         self.FrameRate = 59.98

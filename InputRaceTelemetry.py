@@ -22,7 +22,7 @@ FONT = {'name': 'Mont Heavy DEMO',
 
 def main():
     # Setup iRacing SDK
-    ir = IRSDK()
+    ir = IRSDK(parse_yaml_async=True)
     print("Waiting for iRacing...")
     sys.stdout = open(os.devnull, "w")      # suppress irsdk output
     while not ir.startup(): time.sleep(0.5) # wait for sdk to connect
